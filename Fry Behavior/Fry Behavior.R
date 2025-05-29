@@ -37,21 +37,21 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 ########################### Open Field Assay
 
-filebefore <- "Fry Behavior 2018_before.csv"
+filebefore <- "input files/Fry Behavior 2018_before.csv"
 resultsbefore <- read.csv(filebefore)
 
-fileafter <- "Fry Behavior 2018_after.csv"
+fileafter <- "input files/Fry Behavior 2018_after.csv"
 resultsafter <- read.csv(fileafter)
 
 results <- rbind(resultsbefore, resultsafter)
 
 results$FishTankID <- paste(results$Tank, results$Fish.ID, sep = "_")
 
-file3 <- "Nesting Tanks 2017.csv"
+file3 <- "input files/Nesting Tanks 2017.csv"
 fryInfo <- read.csv(file3)
 fryInfo$Family <- paste(sprintf("%02d", fryInfo$Tank), sprintf("%03d", fryInfo$Male.Number), sep = "-")
 
-file4 <- "Fry Brains 2018.csv"
+file4 <- "input files/Fry Brains 2018.csv"
 frySize <- read.csv(file4)
 frySize$FishTankID <- paste(frySize$Tank, substr(frySize$Fry.Number, 1, 3), 
 	sep = "_")
@@ -213,15 +213,15 @@ figTrtXPlant
 
 ########################### Social Experiment
 
-file1 <- "Social Experiment position data.csv"
+file1 <- "input files/Social Experiment position data.csv"
 dist <- read.csv(file1, stringsAsFactors = TRUE)
 dist$FryID <- paste(dist$Tank, dist$Fry.Number, sep = "-")
 
-file2 <- "Nesting Tanks 2017.csv"
+file2 <- "input files/Nesting Tanks 2017.csv"
 fryInfo <- read.csv(file2, stringsAsFactors = TRUE)
 fryInfo$Family <- fryInfo$Family <- paste(sprintf("%02d", fryInfo$Tank), sprintf("%03d", fryInfo$Male.Number), sep = "-")
 
-file3 <- "Social Experiment.csv"
+file3 <- "input files/Social Experiment.csv"
 expInfo <- read.csv(file3, stringsAsFactors = TRUE)
 expInfo$FryID <- paste(expInfo$Tank, expInfo$Fry.Number, sep = "-")
 
@@ -344,7 +344,7 @@ dev.off()
 
 ########################### Scototaxis
 
-file <- "Scototaxis.csv"
+file <- "input files/Scototaxis.csv"
 scot <- read.csv(file, stringsAsFactors = TRUE)
 
 # data manipulation
