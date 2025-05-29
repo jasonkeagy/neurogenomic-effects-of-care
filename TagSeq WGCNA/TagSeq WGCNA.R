@@ -43,10 +43,10 @@ options(stringsAsFactors = FALSE)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # this reads in the normalized counts file from limma
-data <- read.csv("Limma_normalized.counts.csv", row.names = 1)
+data <- read.csv("input files/Limma_normalized.counts.csv", row.names = 1)
 
 # load trait data to allow subsetting
-my.design <-read.csv("Limma_normalized.counts_sampledata.csv", row.names = 1)
+my.design <-read.csv("input files/Limma_normalized.counts_sampledata.csv", row.names = 1)
 
 
 ###############################################################################
