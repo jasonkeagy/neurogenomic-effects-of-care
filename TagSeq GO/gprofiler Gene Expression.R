@@ -23,7 +23,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 ################################################################################
 
-Day0vs10_DEGs_file <- "DEGs_Day0vs10.csv"
+Day0vs10_DEGs_file <- "input files/DEGs_Day0vs10.csv"
 Day0vs10_DEGs <- read.csv(Day0vs10_DEGs_file, row.names = 1)
 Day0vs10_DEGs <- Day0vs10_DEGs[Day0vs10_DEGs$adj.P.Val < 0.05, ]
 
@@ -41,7 +41,7 @@ if (!is.null(gost.res)) {
 }
 
 
-FvsM_DEGs_file <- "DEGs_FvsM.csv"
+FvsM_DEGs_file <- "input files/DEGs_FvsM.csv"
 FvsM_DEGs <- read.csv(FvsM_DEGs_file, row.names = 1)
 FvsM_DEGs <- FvsM_DEGs[FvsM_DEGs$adj.P.Val < 0.05, ]
 
@@ -55,7 +55,7 @@ if (!is.null(gost.res)) {
 }
 
 
-CvsE_DEGs_file <- "DEGs_CvsE.csv"
+CvsE_DEGs_file <- "input files/DEGs_CvsE.csv"
 CvsE_DEGs <- read.csv(CvsE_DEGs_file, row.names = 1)
 CvsE_DEGs <- CvsE_DEGs[CvsE_DEGs$adj.P.Val < 0.05, ]
 
@@ -87,9 +87,9 @@ ggplot(GO_Day0vs10, aes(x = recall, y = fullname, fill = -log10(p_value))) +
 # WGCNA modules
 
 # load expression and trait file
-file1 <- "dataInput_ParentalCare_2019-08-27.RData"
+file1 <- "input files/dataInput_ParentalCare_2019-08-27.RData"
 load(file1)
-file2 <- "stickle-networkConstr-auto_dataInput_ParentalCare_2019-08-27_8_30_0.15_3_0.995"
+file2 <- "input files/stickle-networkConstr-auto_dataInput_ParentalCare_2019-08-27_8_30_0.15_3_0.995"
 load(file2)
 
 
