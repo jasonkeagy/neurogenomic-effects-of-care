@@ -58,13 +58,13 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Add additional sample info
 
-file1 <- "Fry Brains 2018 for tagSeq.csv"
+file1 <- "input files/Fry Brains 2018 for tagSeq.csv"
 sampleInfo <- read.csv(file1)
 sampleInfo$sampleID <- paste(substr(sampleInfo$Tank, 1, 2), sampleInfo$Fry.Number, sep = "")
 sampleInfo$Plate <- substr(sampleInfo$Submitted.Sample.Name, 1, 1)
 d0$samples <- merge(d0$samples, sampleInfo[!(colnames(sampleInfo) %in% c("Submitted.Sample.Name", "Fry.Number"))], by = "sampleID", sort = FALSE)
 
-file2 <- "Fry Brains 2018.csv"
+file2 <- "input files/Fry Brains 2018.csv"
 expInfo <- read.csv(file2)
 expInfo$sampleID <- paste(substr(expInfo$Tank, 1, 2), expInfo$Fry.Number, sep = "")
 d0$samples <- merge(d0$samples, expInfo[c("sampleID", "Sex1", "Time.In", "Time.Attack", "Dissection.START", "Dissection.END", "Pool", "Length", "Mass")], by.x = "sampleID", sort = FALSE)
@@ -175,7 +175,7 @@ FvsM_LFC <- rownames(top.table_FvsM[top.table_FvsM$adj.P.Val < 0.05, ])
 FvsM_LFC_1 <- rownames(top.table_FvsM[top.table_FvsM$logFC > 0.9 & top.table_FvsM$logFC < 1.1 &
   top.table_FvsM$adj.P.Val < 0.05, ])
 
-stickle_gtf <- read.csv("stickle.gtf", sep = "\t", header = FALSE)
+stickle_gtf <- read.csv("input files/stickle.gtf", sep = "\t", header = FALSE)
 
 #LG19 (XIX) = sex chromosome
 
