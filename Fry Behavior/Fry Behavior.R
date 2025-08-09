@@ -357,8 +357,8 @@ fig_MinDistFish <- fig_MinDistFish +
             position = position_dodge(width = dodge_jitter)) +
   stat_summary(aes(group = Trt:Sex), fun = mean, geom = "line",
                position = position_dodge(width = dodge_stat)) +
-  stat_summary(aes(y = meanMinDistFish, group = Trt:Sex), fun.y = mean, 
-               fun.ymin = meanminus, fun.ymax = meanplus, geom = "pointrange", size = 1.25, 
+  stat_summary(aes(y = meanMinDistFish, group = Trt:Sex), fun = mean, 
+               fun.min = meanminus, fun.max = meanplus, geom = "pointrange", size = 1.25, 
                position = position_dodge(width = dodge_stat), alpha = 0.9) +
   theme_bw() +
   scale_color_discrete(type = colors, name = "Care\nTreatment", labels = c("Orphaned", "Father-reared")) +
