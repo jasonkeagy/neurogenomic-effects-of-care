@@ -1,5 +1,5 @@
 ## Fry Behavior
-# last run 2025 05 27
+# last run 2025 08 09
 # written by Jason Keagy
 
 # R version 4.5.0 (2025-04-11)
@@ -127,11 +127,12 @@ mergedData$Recorder <- as.factor(mergedData$Recorder)
 
 # Sanity check - did the experiment affect behavior?
 t.test(Exploration ~ Time.Period, data = mergedData)
-t.test(Exploration ~ Time.Period, data = mergedData)
+t.test(Activity ~ Time.Period, data = mergedData)
 t.test(propPlant ~ Time.Period, data = mergedData)
 t.test(propFreeze ~ Time.Period, data = mergedData)
 t.test(propEdge ~ Time.Period, data = mergedData)
 t.test(Looking ~ Time.Period, data = mergedData)
+
 
 # for figures
 fontsize <- 24
@@ -139,10 +140,23 @@ dodge_jitter <- 0.4
 dodge_stat <- 0.3
 colors <- c("#53B7E0", "#E0A473")
 
+
+# potential covariates
+t.test(Length ~ Trt, data = mergedData[!(is.na(mergedData$SIDE.RNA)) & (mergedData$TimeBin == "before_1"), ])
+t.test(Mass ~ Trt, data = mergedData[!(is.na(mergedData$SIDE.RNA)) & (mergedData$TimeBin == "before_1"), ])
+
+shapiro.test(mergedData[!(is.na(mergedData$SIDE.RNA)) & (mergedData$TimeBin == "before_1"), ]$Length)
+shapiro.test(mergedData[!(is.na(mergedData$SIDE.RNA)) & (mergedData$TimeBin == "before_1"), ]$Mass)
+
+cor.test(log10(mergedData[!(is.na(mergedData$SIDE.RNA)) & (mergedData$TimeBin == "before_1"), ]$Length), log10(mergedData[!(is.na(mergedData$SIDE.RNA)) & (mergedData$TimeBin == "before_1"), ]$Mass))
+ggplot(mergedData[!(is.na(mergedData$SIDE.RNA)) & (mergedData$TimeBin == "before_1"), ], aes(Length, Mass)) +
+  geom_point() + theme_bw() + scale_x_log10() + scale_y_log10()
+
+
 #################### Plant ####################
 
 # five minutes before and five minutes after
-lmer.plant <- lmer(propPlant ~ Trt *  Sex1 * Time.Period + (1 | Father/Trt/FishTankID) + (1 | Observer),
+lmer.plant <- lmer(propPlant ~ Trt * Sex1 * Time.Period + (1 | Father/Trt/FishTankID) + (1 | Observer),
                data = mergedData[!(is.na(mergedData$SIDE.RNA)) & 
                           (mergedData$TimeBin == "before_1" | mergedData$TimeBin == "after_0"), ],
                control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
@@ -151,6 +165,43 @@ anova(lmer.plant, type = "II")
 ranova(lmer.plant)
 hist(resid(lmer.plant))
 shapiro.test(resid(lmer.plant))
+
+
+# five minutes before and five minutes after - length
+lmer.plant <- lmer(propPlant ~ Length + (1 | Father/Trt/FishTankID) + (1 | Observer),
+                   data = mergedData[!(is.na(mergedData$SIDE.RNA)) & 
+                                       (mergedData$TimeBin == "before_1" | mergedData$TimeBin == "after_0"), ],
+                   control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
+summary(lmer.plant)
+anova(lmer.plant, type = "II")
+ranova(lmer.plant)
+hist(resid(lmer.plant))
+shapiro.test(resid(lmer.plant))
+
+
+# five minutes before and five minutes after - weight
+lmer.plant <- lmer(propPlant ~ Mass + (1 | Father/Trt/FishTankID) + (1 | Observer),
+                   data = mergedData[!(is.na(mergedData$SIDE.RNA)) & 
+                                       (mergedData$TimeBin == "before_1" | mergedData$TimeBin == "after_0"), ],
+                   control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
+summary(lmer.plant)
+anova(lmer.plant, type = "II")
+ranova(lmer.plant)
+hist(resid(lmer.plant))
+shapiro.test(resid(lmer.plant))
+
+
+# five minutes before and five minutes after - Fulton's K condition factor
+lmer.plant <- lmer(propPlant ~ I(100 * Mass / (0.1 * Length)^3) + (1 | Father/Trt/FishTankID) + (1 | Observer),
+                   data = mergedData[!(is.na(mergedData$SIDE.RNA)) & 
+                                       (mergedData$TimeBin == "before_1" | mergedData$TimeBin == "after_0"), ],
+                   control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
+summary(lmer.plant)
+anova(lmer.plant, type = "II")
+ranova(lmer.plant)
+hist(resid(lmer.plant))
+shapiro.test(resid(lmer.plant))
+
 
 # treatment:sex over 2 time periods
 figTrtXPlant <- ggplot(data = mergedData[!(is.na(mergedData$SIDE.RNA)) & 
@@ -184,6 +235,16 @@ pdf("TrtXPlant.pdf", height = 6, width = 8)
 dev.off()
 
 
+#  treatment:sex over all 4 time periods
+lmer.plant <- lmer(propPlant ~ Trt * Sex1 * Time.Period + (1 | Father/Trt/FishTankID) + (1 | Observer),
+                   data = mergedData[!(is.na(mergedData$SIDE.RNA)), ],
+                   control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
+summary(lmer.plant)
+anova(lmer.plant, type = "II")
+ranova(lmer.plant)
+hist(resid(lmer.plant))
+shapiro.test(resid(lmer.plant))
+
 # treatment:sex over all 4 time periods
 figTrtXPlant <- ggplot(data = mergedData[!(is.na(mergedData$SIDE.RNA)), ], 
                         aes(x = TimeBin, y = propPlant, 
@@ -195,7 +256,7 @@ figTrtXPlant <- figTrtXPlant + scale_size_continuous(guide = "none") +
             position = position_dodge(width = dodge_jitter)) +
   stat_summary(aes(group = Trt:Sex1), fun.y = mean, geom = "line",
                position = position_dodge(width = dodge_stat)) +
-  stat_summary(aes(y = propPlant, group = Trt:Sex1), fun.y = mean, 
+  stat_summary(aes(y = propPlant, group = Trt:Sex1), fun = mean, 
     fun.min = meanminus, fun.max = meanplus, geom = "pointrange", size = 1.25, 
     position = position_dodge(width = dodge_stat), alpha = 0.9) +
   ylab("Proportion Time Under Plant in\nOpen Field Assay") +
@@ -238,7 +299,7 @@ mergedData <- mergedData[mergedData$Dist.Edge < 700, ]
 mergedData <- mergedData[mergedData$Dist.Moved < 10000 | is.na(mergedData$Dist.Moved), ]
 
 # new dataset with means for each fish for each period
-DistFish <- ddply(mergedData, c("FryID", "Male.Number", "Tank", "Time.Period", "Trt", "Sex", "Obs"), 
+DistFish <- ddply(mergedData, c("FryID", "Male.Number", "Tank", "Time.Period", "Trt", "Sex", "Obs", "Length", "Mass"), 
                   summarise, meanMinDistFish = mean(Min.Dist.Fish, na.rm = TRUE))
 
 hist(DistFish$meanMinDistFish)
@@ -252,6 +313,33 @@ DistFish$ln.meanMinDistFish <- log(DistFish$meanMinDistFish)
 leveneTest(ln.meanMinDistFish ~ Trt * Sex * Time.Period, data = DistFish)
 
 l <- lmer(ln.meanMinDistFish ~ Trt * Sex * Time.Period + (1 | Male.Number/Tank/FryID) + (1 | Obs), 
+          data = DistFish)
+summary(l)
+anova(l, type = "II")
+ranova(l)
+hist(residuals(l))
+shapiro.test(residuals(l))
+
+
+l <- lmer(ln.meanMinDistFish ~ Length + (1 | Male.Number/Tank/FryID) + (1 | Obs), 
+          data = DistFish)
+summary(l)
+anova(l, type = "II")
+ranova(l)
+hist(residuals(l))
+shapiro.test(residuals(l))
+
+
+l <- lmer(ln.meanMinDistFish ~ Mass + (1 | Male.Number/Tank/FryID) + (1 | Obs), 
+          data = DistFish)
+summary(l)
+anova(l, type = "II")
+ranova(l)
+hist(residuals(l))
+shapiro.test(residuals(l))
+
+
+l <- lmer(ln.meanMinDistFish ~ I(100 * Mass / (0.1 * Length)^3) + (1 | Male.Number/Tank/FryID) + (1 | Obs), 
           data = DistFish)
 summary(l)
 anova(l, type = "II")
@@ -291,7 +379,7 @@ dev.off()
 
 
 # new dataset with means for each fish for each period
-DistMoved <- ddply(mergedData, c("FryID", "Male.Number", "Tank", "Time.Period", "Trt", "Sex", "Obs"), 
+DistMoved <- ddply(mergedData, c("FryID", "Male.Number", "Tank", "Time.Period", "Trt", "Sex", "Obs", "Length", "Mass"), 
                    summarise, meanDistMoved = mean(Dist.Moved, na.rm = T))
 
 hist(DistMoved$meanDistMoved)
@@ -309,6 +397,34 @@ l <- lmer(sqrt.meanDistMoved ~ Trt * Sex * Time.Period + (1 | Male.Number/Tank/F
           control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
 summary(l)
 anova(l, type = "II")
+hist(residuals(l))
+ranova(l)
+
+
+l <- lmer(sqrt.meanDistMoved ~ Length + (1 | Male.Number/Tank/FryID) + (1 | Obs), 
+          data = DistMoved, 
+          control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
+summary(l)
+anova(l, type = "II")
+hist(residuals(l))
+ranova(l)
+
+
+l <- lmer(sqrt.meanDistMoved ~ Mass + (1 | Male.Number/Tank/FryID) + (1 | Obs), 
+          data = DistMoved, 
+          control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
+summary(l)
+anova(l, type = "II")
+hist(residuals(l))
+ranova(l)
+
+
+l <- lmer(sqrt.meanDistMoved ~ I(100 * Mass / (0.1 * Length)^3) + (1 | Male.Number/Tank/FryID) + (1 | Obs), 
+          data = DistMoved, 
+          control = lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
+summary(l)
+anova(l, type = "II")
+hist(residuals(l))
 ranova(l)
 
 
@@ -322,7 +438,7 @@ fig_DistMoved <- fig_DistMoved +
   stat_summary(aes(group = Trt:Sex), fun.y = mean, geom = "line",
                position = position_dodge(width = dodge_stat)) +
   stat_summary(aes(y = meanDistMoved, group = Trt:Sex), fun.y = mean, 
-               fun.ymin = meanminus, fun.ymax = meanplus, geom = "pointrange", size = 1.25, 
+               fun.min = meanminus, fun.max = meanplus, geom = "pointrange", size = 1.25, 
                position = position_dodge(width = dodge_stat), alpha = 0.9) +
   theme_bw() +
   scale_color_discrete(type = colors, name = "Care\nTreatment", labels = c("Orphaned", "Father-reared")) +
@@ -417,6 +533,37 @@ anova(PCA, type = "II")
 # singular fit caused by random effects having no variance
 hist(residuals(PCA))
 shapiro.test(residuals(PCA))
+ranova(PCA)
+
+
+PCA <- lmer(PC1 ~ Length + 
+              (1 | Father/Treatment) + (1 | Observer), data = scot_pair)
+summary(PCA)
+anova(PCA, type = "II")
+# singular fit caused by random effects having no variance
+hist(residuals(PCA))
+shapiro.test(residuals(PCA))
+ranova(PCA)
+
+
+PCA <- lmer(PC1 ~ Weight + 
+              (1 | Father/Treatment) + (1 | Observer), data = scot_pair)
+summary(PCA)
+anova(PCA, type = "II")
+# singular fit caused by random effects having no variance
+hist(residuals(PCA))
+shapiro.test(residuals(PCA))
+ranova(PCA)
+
+
+PCA <- lmer(PC1 ~ I(100 * Weight / (0.1 * Length)^3) + 
+              (1 | Father/Treatment) + (1 | Observer), data = scot_pair)
+summary(PCA)
+anova(PCA, type = "II")
+# singular fit caused by random effects having no variance
+hist(residuals(PCA))
+shapiro.test(residuals(PCA))
+ranova(PCA)
 
 
 # plot
